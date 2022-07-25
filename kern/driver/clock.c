@@ -24,12 +24,13 @@ static inline uint64_t get_cycles(void) {
 #endif
 }
 
-static uint64_t timebase = 100000;
+static uint64_t timebase;
 
 
 void clock_init(void) {
     set_csr(sie, MIP_STIP);
-
+    // divided by 100 when using QEMU(10MHz)
+    timebase = 1e7 / 100;
     clock_set_next_event();
     // initialize time counter 'ticks' to zero
     ticks = 0;

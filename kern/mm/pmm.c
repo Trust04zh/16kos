@@ -98,10 +98,10 @@ static void page_init(void) {
 
     va_pa_offset = KERNBASE - 0x80200000;
 
-    uint_t mem_begin = KERNEL_BEGIN_PADDR;
-    uint_t mem_end = PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR;
-    uint_t mem_size = PHYSICAL_MEMORY_END;
-
+    uint64_t mem_begin = KERNEL_BEGIN_PADDR;
+    uint64_t mem_size = PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR;
+    uint64_t mem_end = PHYSICAL_MEMORY_END;
+    cprintf("membegin %llx memend %llx mem_size %llx\n",mem_begin, mem_end, mem_size);
     cprintf("physcial memory map:\n");
     cprintf("  memory: 0x%08lx, [0x%08lx, 0x%08lx].\n", mem_size, mem_begin,
             mem_end - 1);

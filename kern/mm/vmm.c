@@ -34,6 +34,24 @@
      void check_vma_struct(void);
      void check_pgfault(void);
 */
+void print_vma(char *name, struct vma_struct *vma){
+	cprintf("-- %s print_vma --\n", name);
+	cprintf("   mm_struct: %p\n",vma->vm_mm);
+	cprintf("   vm_start,vm_end: %x,%x\n",vma->vm_start,vma->vm_end);
+	cprintf("   vm_flags: %x\n",vma->vm_flags);
+	cprintf("   list_entry_t: %p\n",&vma->list_link);
+}
+
+void print_mm(char *name, struct mm_struct *mm){
+	cprintf("-- %s print_mm --\n",name);
+	cprintf("   mmap_list: %p\n",&mm->mmap_list);
+	cprintf("   map_count: %d\n",mm->map_count);
+	list_entry_t *list = &mm->mmap_list;
+	for(int i=0;i<mm->map_count;i++){
+		list = list_next(list);
+		print_vma(name, le2vma(list,list_link));
+	}
+}
 
 static void check_vmm(void);
 static void check_vma_struct(void);
