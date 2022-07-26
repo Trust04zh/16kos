@@ -44,20 +44,24 @@
  *
  * */
 
-/* All physical memory mapped at this address */
-#define KERNBASE            0xFFFFFFFFC0200000
-#define KMEMSIZE            0x7E00000                  // the maximum amount of physical memory
-#define KERNTOP             (KERNBASE + KMEMSIZE)
-
-#define KERNEL_BEGIN_PADDR 0x80200000
-#define KERNEL_BEGIN_VADDR 0xFFFFFFFFC0200000
-#define PHYSICAL_MEMORY_END 0x88000000
 /* *
  * Virtual page table. Entry PDX[VPT] in the PD (Page Directory) contains
  * a pointer to the page directory itself, thereby turning the PD into a page
  * table, which maps all the PTEs (Page Table Entry) containing the page mappings
  * for the entire virtual address space into that 4 Meg region starting at VPT.
  * */
+
+/* All physical memory mapped at this address */
+// QEMU 缺省的RAM为 0x80000000到0x88000000, 128MiB, 0x80000000到0x80200000被OpenSBI占用
+#define PHYSICAL_MEMORY_BEGIN       0x80000000
+#define PHYSICAL_MEMORY_SIZE        0x8000000
+#define PHYSICAL_MEMORY_END         (PHYSICAL_MEMORY_BEGIN + PHYSICAL_MEMORY_SIZE)
+#define PHYSICAL_MEMORY_OFFSET      0xFFFFFFF000000000
+#define KERNEL_BEGIN_PADDR          0x80200000
+#define KERNEL_BEGIN_VADDR          (KERNEL_BEGIN_PADDR + PHYSICAL_MEMORY_OFFSET)
+#define KERNBASE                    KERNEL_BEGIN_VADDR // 虚拟地址空间下内核的起始地址，把原有内存映射到虚拟内存空间的最后一页
+#define KMEMSIZE            (PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR)          // the maximum amount of physical memory
+#define KERNTOP             (KERNBASE + KMEMSIZE) // 0x88000000对应的虚拟地址
 
 #define KSTACKPAGE          2                           // # of pages in kernel stack
 #define KSTACKSIZE          (KSTACKPAGE * PGSIZE)       // sizeof kernel stack

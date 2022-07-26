@@ -217,6 +217,15 @@ qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-bios default \
 		-device loader,file=$(UCOREIMG),addr=0x80200000
 
+.PHONY: qemu-gdb
+qemu-gdb: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
+	$(V)$(QEMU) \
+		-machine virt \
+		-nographic \
+		-bios default \
+		-device loader,file=$(UCOREIMG),addr=0x80200000 \
+		-S -s
+
 spike: $(UCOREIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
 

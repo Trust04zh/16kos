@@ -10,7 +10,7 @@
 void ide_init(void) {}
 
 #define MAX_IDE 2
-#define MAX_DISK_NSECS 56
+#define MAX_DISK_NSECS 224
 static char ide[MAX_DISK_NSECS * SECTSIZE];
 
 bool ide_device_valid(unsigned short ideno) { return ideno < MAX_IDE; }

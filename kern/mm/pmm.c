@@ -96,10 +96,10 @@ size_t nr_free_pages(void) {
 static void page_init(void) {
     extern char kern_entry[];
 
-    va_pa_offset = KERNBASE - 0x80200000;
+    va_pa_offset = PHYSICAL_MEMORY_OFFSET;
 
     uint64_t mem_begin = KERNEL_BEGIN_PADDR;
-    uint64_t mem_size = PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR;
+    uint64_t mem_size = KMEMSIZE;
     uint64_t mem_end = PHYSICAL_MEMORY_END;
     cprintf("membegin %llx memend %llx mem_size %llx\n",mem_begin, mem_end, mem_size);
     cprintf("physcial memory map:\n");
@@ -185,20 +185,20 @@ void pmm_init(void) {
 
     // use pmm->check to verify the correctness of the alloc/free function in a
     // pmm
-    //check_alloc_page();
+    check_alloc_page();
 
     // create boot_pgdir, an initial page directory(Page Directory Table, PDT)
-    extern char boot_page_table_sv39[];
-    boot_pgdir = (pte_t*)boot_page_table_sv39;
+    extern char boot_page_table_sv47[];
+    boot_pgdir = (pte_t*)boot_page_table_sv47;
     boot_cr3 = PADDR(boot_pgdir);
 
-    //check_pgdir();
-
-    static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
+    check_pgdir();
+    // zh: I don't see if this assertion makes any sense.
+    // static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
 
     // now the basic virtual memory map(see memalyout.h) is established.
     // check the correctness of the basic virtual memory map.
-    //check_boot_pgdir();
+    check_boot_pgdir();
 
 
     kmalloc_init();

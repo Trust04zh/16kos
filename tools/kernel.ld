@@ -4,7 +4,9 @@
 OUTPUT_ARCH(riscv)
 ENTRY(kern_entry)
 
-BASE_ADDRESS = 0xFFFFFFFFC0200000;
+/* BASE_ADDRESS = 0xFFFFFFFFC0200000; */
+BASE_ADDRESS = 0xFFFFFFF080200000;
+PAGE_SIZE = 0x4000;
 
 SECTIONS
 {
@@ -22,7 +24,7 @@ SECTIONS
     }
 
     /* Adjust the address for the data segment to the next page */
-    . = ALIGN(0x1000);
+    . = ALIGN(PAGE_SIZE);
 
     /* The data segment */
     .data : {

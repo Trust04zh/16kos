@@ -16,12 +16,12 @@ syscall(int64_t num, ...) {
     }
     va_end(ap);
     asm volatile (
-        "lw a0, %1\n"
-        "lw a1, %2\n"
-        "lw a2, %3\n"
-        "lw a3, %4\n"
-        "lw a4, %5\n"
-        "lw a5, %6\n"
+        "ld a0, %1\n"
+        "ld a1, %2\n"
+        "ld a2, %3\n"
+        "ld a3, %4\n"
+        "ld a4, %5\n"
+        "ld a5, %6\n"
         "ecall\n"
         "sw a0, %0"
         : "=m" (ret)

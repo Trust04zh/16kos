@@ -11,8 +11,8 @@
 
 // the valid vaddr for check is between 0~CHECK_VALID_VADDR-1
 #define CHECK_VALID_VIR_PAGE_NUM 5
-#define BEING_CHECK_VALID_VADDR 0X1000
-#define CHECK_VALID_VADDR (CHECK_VALID_VIR_PAGE_NUM+1)*0x1000
+#define BEING_CHECK_VALID_VADDR 0x4000
+#define CHECK_VALID_VADDR (CHECK_VALID_VIR_PAGE_NUM+1)*0x4000
 // the max number of valid physical page for check
 #define CHECK_VALID_PHY_PAGE_NUM 4
 // the max access seq number
@@ -48,7 +48,7 @@ swap_init(void)
      {
           swap_init_ok = 1;
           cprintf("SWAP: manager = %s\n", sm->name);
-          //check_swap();
+          check_swap();
      }
 
      return r;
@@ -143,21 +143,21 @@ swap_in(struct mm_struct *mm, uintptr_t addr, struct Page **ptr_result)
 static inline void
 check_content_set(void)
 {
-     *(unsigned char *)0x1000 = 0x0a;
+     *(unsigned char *)0x4000 = 0x0a;
      assert(pgfault_num==1);
-     *(unsigned char *)0x1010 = 0x0a;
+     *(unsigned char *)0x4010 = 0x0a;
      assert(pgfault_num==1);
-     *(unsigned char *)0x2000 = 0x0b;
+     *(unsigned char *)0x8000 = 0x0b;
      assert(pgfault_num==2);
-     *(unsigned char *)0x2010 = 0x0b;
+     *(unsigned char *)0x8010 = 0x0b;
      assert(pgfault_num==2);
-     *(unsigned char *)0x3000 = 0x0c;
+     *(unsigned char *)0xc000 = 0x0c;
      assert(pgfault_num==3);
-     *(unsigned char *)0x3010 = 0x0c;
+     *(unsigned char *)0xc010 = 0x0c;
      assert(pgfault_num==3);
-     *(unsigned char *)0x4000 = 0x0d;
+     *(unsigned char *)0x10000 = 0x0d;
      assert(pgfault_num==4);
-     *(unsigned char *)0x4010 = 0x0d;
+     *(unsigned char *)0x10010 = 0x0d;
      assert(pgfault_num==4);
 }
 
@@ -208,12 +208,12 @@ check_swap(void)
 
      insert_vma_struct(mm, vma);
 
-     //setup the temp Page Table vaddr 0~4MB
-     cprintf("setup Page Table for vaddr 0X1000, so alloc a page\n");
+     //setup the temp Page Table vaddr 0~16MB
+     cprintf("setup Page Table for vaddr 0x4000, so alloc a page\n");
      pte_t *temp_ptep=NULL;
      temp_ptep = get_pte(mm->pgdir, BEING_CHECK_VALID_VADDR, 1);
      assert(temp_ptep!= NULL);
-     cprintf("setup Page Table vaddr 0~4MB OVER!\n");
+     cprintf("setup Page Table vaddr 0~16MB OVER!\n");
      
      for (i=0;i<CHECK_VALID_PHY_PAGE_NUM;i++) {
           check_rp[i] = alloc_page();
@@ -246,7 +246,7 @@ check_swap(void)
      
      for (i= 0;i<CHECK_VALID_PHY_PAGE_NUM;i++) {
          check_ptep[i]=0;
-         check_ptep[i] = get_pte(pgdir, (i+1)*0x1000, 0);
+         check_ptep[i] = get_pte(pgdir, (i+1)*0x4000, 0);
          //cprintf("i %d, check_ptep addr %x, value %x\n", i, check_ptep[i], *check_ptep[i]);
          assert(check_ptep[i] != NULL);
          assert(pte2page(*check_ptep[i]) == check_rp[i]);

@@ -135,12 +135,14 @@
 #define SATP64_ASID 0x0FFFF00000000000
 #define SATP64_PPN  0x00000FFFFFFFFFFF
 
+// zh: unused definition here
 #define SATP_MODE_OFF  0
 #define SATP_MODE_SV32 1
 #define SATP_MODE_SV39 8
 #define SATP_MODE_SV48 9
 #define SATP_MODE_SV57 10
 #define SATP_MODE_SV64 11
+#define SATP_MODE_SV47 14
 
 #define PMP_R     0x01
 #define PMP_W     0x02
@@ -194,13 +196,14 @@
 #if __riscv_xlen == 64
 # define MSTATUS_SD MSTATUS64_SD
 # define SSTATUS_SD SSTATUS64_SD
-# define RISCV_PGLEVEL_BITS 9
+// zh: unused definition here
+# define RISCV_PGLEVEL_BITS 11
 #else
 # define MSTATUS_SD MSTATUS32_SD
 # define SSTATUS_SD SSTATUS32_SD
 # define RISCV_PGLEVEL_BITS 10
 #endif
-#define RISCV_PGSHIFT 12
+#define RISCV_PGSHIFT 14
 #define RISCV_PGSIZE (1 << RISCV_PGSHIFT)
 
 #ifndef __ASSEMBLER__
@@ -244,7 +247,7 @@
 
 static inline void
 lcr3(unsigned long cr3) {
-    write_csr(satp, 0x8000000000000000 | (cr3 >> RISCV_PGSHIFT));
+    write_csr(satp, 0xe000000000000000 | (cr3 >> RISCV_PGSHIFT));
 }
 
 #endif

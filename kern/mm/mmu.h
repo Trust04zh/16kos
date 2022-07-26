@@ -35,17 +35,18 @@
  */
 
 // page directory index
-#define PDX1(la) ((((uintptr_t)(la)) >> PDX1SHIFT) & 0x1FF)
-#define PDX0(la) ((((uintptr_t)(la)) >> PDX0SHIFT) & 0x1FF)
-
+#define PDX1(la) ((((uintptr_t)(la)) >> PDX1SHIFT) & PGLEVEL_BITS_MASK) // la here is virtual address
+#define PDX0(la) ((((uintptr_t)(la)) >> PDX0SHIFT) & PGLEVEL_BITS_MASK)
 // page table index
-#define PTX(la) ((((uintptr_t)(la)) >> PTXSHIFT) & 0x1FF)
+#define PTX(la) ((((uintptr_t)(la)) >> PTXSHIFT) & PGLEVEL_BITS_MASK)
 
 // page number field of address
-#define PPN(la) (((uintptr_t)(la)) >> PTXSHIFT)
+#define PASIZE          56                      // bit size of physical address
+#define PPN_MASK        (((uint64_t)1 << PASIZE) - 1)
+#define PPN(la) ((((uintptr_t)(la)) >> PTXSHIFT) & PPN_MASK) 
 
 // offset in page
-#define PGOFF(la) (((uintptr_t)(la)) & 0xFFF)
+#define PGOFF(la) (((uintptr_t)(la)) & PGSHIFT_MASK)
 
 // construct linear address from indexes and offset
 #define PGADDR(d1, d0, t, o) ((uintptr_t)((d1) << PDX1SHIFT | (d0) << PDX0SHIFT | (t) << PTXSHIFT | (o)))
@@ -55,17 +56,21 @@
 #define PDE_ADDR(pde)   PTE_ADDR(pde)
 
 /* page directory and page table constants */
-#define NPDEENTRY       512                    // page directory entries per page directory
-#define NPTEENTRY       512                    // page table entries per page table
+#define PTE_SIZE        8
+#define NPDEENTRY       NPTEENTRY               // page directory entries per page directory
+#define NPTEENTRY       (PGSIZE / PTE_SIZE)     // page table entries per page table
 
-#define PGSIZE          4096                    // bytes mapped by a page
-#define PGSHIFT         12                      // log2(PGSIZE)
+#define PGSHIFT         14                      // log2(PGSIZE)
+#define PGSHIFT_MASK    ((1 << PGSHIFT) - 1)    // mask for page offset
+#define PGSIZE          (1 << PGSHIFT)          // bytes mapped by a page
+#define PGLEVEL_BITS    11                      
+#define PGLEVEL_BITS_MASK   ((1 << PGLEVEL_BITS) - 1)   // mask for page level
 #define PTSIZE          (PGSIZE * NPTEENTRY)    // bytes mapped by a page directory entry
-#define PTSHIFT         21                      // log2(PTSIZE)
+#define PTSHIFT         (PGSHIFT + PGLEVEL_BITS)    // log2(PTSIZE)
 
-#define PTXSHIFT        12                      // offset of PTX in a linear address
-#define PDX0SHIFT       21                      // offset of PDX in a linear address
-#define PDX1SHIFT		30
+#define PTXSHIFT        PGSHIFT                 // offset of PTX in a linear address
+#define PDX0SHIFT       (PGSHIFT + PGLEVEL_BITS)    // offset of PDX0 in a linear address
+#define PDX1SHIFT       (PDX0SHIFT + PGLEVEL_BITS)  // offset of PDX0 in a linear address
 #define PTE_PPN_SHIFT   10                      // offset of PPN in a physical address
 
 // page table entry (PTE) fields

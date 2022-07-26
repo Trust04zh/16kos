@@ -4,6 +4,8 @@
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
+PAGE_SIZE = 0x4000;
+
 SECTIONS {
     /* Load programs at this address: "." means the current address */
     . = 0x800020;
@@ -19,7 +21,7 @@ SECTIONS {
     }
 
     /* Adjust the address for the data segment to the next page */
-    . = ALIGN(0x1000);
+    . = ALIGN(PAGE_SIZE);
 
     .data : {
         *(.data)
