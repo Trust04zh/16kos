@@ -22,6 +22,7 @@
 #define SYS_pgdir           31
 /*only for labschedule*/
 #define SYS_labschedule_set_priority 255
+#define SYS_get_pcb_address 254 
 
 /* SYS_fork flags */
 #define CLONE_VM            0x00000100  // set if VM shared between processes

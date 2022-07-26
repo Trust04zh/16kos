@@ -76,3 +76,7 @@ sys_gettime(void) {
     return syscall(SYS_gettime);
 }
 
+int 
+sys_get_pcb_address(void){
+    return syscall(SYS_get_pcb_address);
+}

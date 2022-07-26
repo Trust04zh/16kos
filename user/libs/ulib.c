@@ -45,3 +45,8 @@ unsigned int
 gettime_msec(void) {
     return (unsigned int)sys_gettime();
 }
+
+int
+get_pcb_address(void){
+    return sys_get_pcb_address();
+}

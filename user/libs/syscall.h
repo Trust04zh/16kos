@@ -9,7 +9,7 @@ int sys_kill(int64_t pid);
 int sys_getpid(void);
 int sys_putc(int64_t c);
 int sys_gettime(void);
-
+int sys_get_pcb_address(void);
 
 #endif /* !__USER_LIBS_SYSCALL_H__ */
 

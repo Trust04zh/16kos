@@ -63,6 +63,12 @@ static int sys_gettime(uint64_t arg[]){
     return (int)ticks*10;
 }
 
+static int sys_get_pcb_address(){
+    // return &current;
+    
+    return &(current->pid);
+}
+
 static int (*syscalls[])(uint64_t arg[]) = {
     [SYS_exit]              sys_exit,
     [SYS_fork]              sys_fork,
@@ -73,6 +79,7 @@ static int (*syscalls[])(uint64_t arg[]) = {
     [SYS_getpid]            sys_getpid,
     [SYS_putc]              sys_putc,
     [SYS_gettime]           sys_gettime,
+    [SYS_get_pcb_address]   sys_get_pcb_address,
 };
 
 #define NUM_SYSCALLS        ((sizeof(syscalls)) / (sizeof(syscalls[0])))

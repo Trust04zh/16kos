@@ -31,6 +31,7 @@ void yield(void);
 int kill(int pid);
 int getpid(void);
 unsigned int gettime_msec(void);
+int get_pcb_address(void);
 
 #endif /* !__USER_LIBS_ULIB_H__ */
 
