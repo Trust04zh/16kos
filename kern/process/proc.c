@@ -188,7 +188,7 @@ get_pid(void) {
 }
 
 // proc_run - make process "proc" running on cpu
-// NOTE: before call switch_to, should load  base addr of "proc"'s new PDT
+// NOTE: before call switch_to, should load base addr of "proc"'s new PDT
 void
 proc_run(struct proc_struct *proc) {
     if (proc != current) {
