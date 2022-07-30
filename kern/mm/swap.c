@@ -145,19 +145,19 @@ check_content_set(void)
 {
      *(unsigned char *)0x4000 = 0x0a;
      assert(pgfault_num==1);
-     *(unsigned char *)0x4010 = 0x0a;
+     *(unsigned char *)0x7fff = 0x0a;
      assert(pgfault_num==1);
      *(unsigned char *)0x8000 = 0x0b;
      assert(pgfault_num==2);
-     *(unsigned char *)0x8010 = 0x0b;
+     *(unsigned char *)0xbfff = 0x0b;
      assert(pgfault_num==2);
      *(unsigned char *)0xc000 = 0x0c;
      assert(pgfault_num==3);
-     *(unsigned char *)0xc010 = 0x0c;
+     *(unsigned char *)0xffff = 0x0c;
      assert(pgfault_num==3);
      *(unsigned char *)0x10000 = 0x0d;
      assert(pgfault_num==4);
-     *(unsigned char *)0x10010 = 0x0d;
+     *(unsigned char *)0x13fff = 0x0d;
      assert(pgfault_num==4);
 }
 
