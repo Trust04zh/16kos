@@ -180,14 +180,16 @@ extern free_area_t free_area;
 static void
 check_swap(void)
 {
-    //backup mem env
+//     backup mem env
      int ret, count = 0, total = 0, i;
      list_entry_t *le = &free_list;
      while ((le = list_next(le)) != &free_list) {
         struct Page *p = le2page(le, page_link);
+        cprintf("pa: %x\n",page2pa(p));
         assert(PageProperty(p));
         count ++, total += p->property;
      }
+     cprintf("total is %u, nr_free_pages() is %u\n ",total,nr_free_pages());
      assert(total == nr_free_pages());
      cprintf("BEGIN check_swap: count %d, total %d\n",count,total);
      

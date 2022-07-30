@@ -103,6 +103,7 @@ struct Page {
     list_entry_t page_link;         // free list link
     list_entry_t pra_page_link;     // used for pra (page replace algorithm)
     uintptr_t pra_vaddr;            // used for pra (page replace algorithm)
+    list_entry_t buddy_link;
 };
 
 /* Flags describing the status of a page frame */
