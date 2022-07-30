@@ -1,0 +1,3 @@
+VPN[2]:11,VPN[1]:11,VPN[0]:11,page offset:14
+PPN[2]:22,PPN[1]:11,PPN[0]:11,page offset:14
+Reserved:10,PPN[2]:22,PPN[1]:11,PPN[0]:11,RSW:2,D:1,A:1,G:1,U:1,X:1,W:1,R:1,V:1
