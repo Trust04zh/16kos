@@ -210,7 +210,7 @@ kallocated(void) {
 static int find_order(int size)
 {
 	int order = 0;
-	for ( ; size > 4096 ; size >>=1)
+	for ( ; size > PGSIZE ; size >>=1)
 		order++;
 	return order;
 }
