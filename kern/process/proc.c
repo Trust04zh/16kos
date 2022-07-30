@@ -770,7 +770,7 @@ user_main(void *arg) {
 #ifdef TEST
     KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
 #else
-    KERNEL_EXECVE(print_add);
+    KERNEL_EXECVE(rr);
 #endif
     panic("user_main execve failed.\n");
 }
@@ -805,6 +805,7 @@ init_main(void *arg) {
 //           - create the second kernel thread init_main
 void
 proc_init(void) {
+    cprintf("start the proc_init function\n");
     int i;
 
     list_init(&proc_list);

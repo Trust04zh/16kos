@@ -19,6 +19,7 @@ best_fit_init(void)
 static void
 best_fit_init_memmap(struct Page *base, size_t n)
 {
+    cprintf("in best_fit_init_memmap, n is %u \n ", n);
     assert(n > 0);
     struct Page *p = base;
     for (; p != base + n; p ++) {
@@ -77,7 +78,7 @@ best_fit_alloc_pages(size_t n)
         if (page->property > n) {
             struct Page *p = page + n;
             p->property = page->property - n;
-            SetPageProperty(p);
+            SetPageProperty(p);  // set means the header
             list_add(prev, &(p->page_link));
         }
         nr_free -= n;
