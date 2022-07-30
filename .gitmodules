@@ -1,0 +1,3 @@
+[submodule "16kos-qemu"]
+	path = 16kos-qemu
+	url = https://github.com/Trust04zh/16kos-qemu.git
