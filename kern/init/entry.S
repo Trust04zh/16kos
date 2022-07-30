@@ -45,7 +45,7 @@ bootstacktop:
 # 分配一个页给预设的第一级页表
 boot_page_table_sv47:
     # 0xffff_fff0_0000_0000 map to 0x00000000 (64G)
-    # 前 2047 个页表项均设置为 0 ，因此 V=0 ，意味着是空的(unmapped)
-    .zero 8 * ((1 << PGLEVEL_BITS) - 1)
+    .quad 0xcf # VRWXAD
+    .zero 8 * ((1 << PGLEVEL_BITS) - 1 - 1)
     # 设置最后一个页表项，标志位 VRWXAD 均为 1
     .quad 0xcf # VRWXAD

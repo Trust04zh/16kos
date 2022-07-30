@@ -16,6 +16,8 @@
 int kern_init(void) __attribute__((noreturn));
 int
 kern_init(void) {
+    extern uint64_t boot_page_table_sv47[];
+    boot_page_table_sv47[0] = 0;
     extern char edata[], end[];
     memset(edata, 0, end - edata);
     cons_init();                // init the console
