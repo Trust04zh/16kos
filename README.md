@@ -135,11 +135,20 @@ First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在�
 
 #### Best Fit
 
-我们将Best Fit页分配算法实现在`kern/mm/best_fit_pmm.c`中，该算法与Best Fit算法的区别在于，其在分配空闲页时选择的是最合适的——在满足需求页数目的前提下最小的——空闲页组，而不是第一个满足需求页数目的空闲页组。Best Fit算法的验证由ucore内置，我们的算法能通过验证。
+我们将Best Fit页分配算法实现在`kern/mm/best_fit_pmm.c`中，该算法与Best Fit算法的区别在于，其在分配空闲页时选择的是最合适的——在满足需求页数目的前提下最小的——空闲页组，而不是第一个满足需求页数目的空闲页组。Best fit 算法基本扩展于First fit 算法.  Best Fit算法的验证主要进行与first fit 不同之处的验证， 在first fit验证算法上进行精简。
 
 #### (Binary) Buddy System
 
-TODO: 
+我们将张教授上课教的算法实现在'kern/mm/buddy_pmm.c'中，其中维护1,2,4,8,16,32,64,128,256,512,1024 大小的连续页表的数组。每个数组的头列表都是一个free_area结构体，在之后连接属于这个大小的连续页面。每次alloc page 之时，先寻找到大于等于这个需求页面的大小，然后整块分配，把多余的页表还回数组中。在free页面的时候，需要考虑是否能和周围的页表项进行合并，然后升级。
+
+在能否进行合并的判定上面。我们采取张教授所提示的依据物理地址或者物理页号的二进制位数结合掩码的形式判断，比如对于页表项大小是1，我们判定物理页面地址前（32-15）位是相同的即可合并。
+
+在实现对于PAGE FLAG 的管理上面，我们采取和First fit相同的管理方式，是free page 并且是链表头部，我们会对应page SetPageProperty。
+
+在对于free_area 的遗留问题，最开始我们使用page_link 链接相同大小的page, 但在之后发现free_area在别的地方比如swap的测试中有直接的使用，所以在后来在page struct中添加buddy_link属性，并且依旧在对buddy数组维护的过程中，依旧维护free_area所代表的free_page的链表。
+
+![image](https://user-images.githubusercontent.com/87351355/181915001-59a5dbd9-9581-4155-9b01-779bff512c79.png)
+
 
 ### 进程管理
 
