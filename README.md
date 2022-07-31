@@ -28,9 +28,10 @@
 构建`qemu`环境与操作系统并运行
 
 ```shell
-$ cd qemu
+$ cd 16kos-qemu
 $ make clean && make
 $ cd ..
+$ source setup_env.sh
 $ make clean && make && make qemu 
 ```
 
