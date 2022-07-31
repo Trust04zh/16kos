@@ -38,6 +38,6 @@ kern_init(void) {
 
     clock_init();               // init clock interrupt
     intr_enable();              // enable irq interrupt
-    
+    cprintf("Start run the idle process\n");
     cpu_idle();                 // run idle process
 }

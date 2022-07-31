@@ -770,7 +770,7 @@ user_main(void *arg) {
 #ifdef TEST
     KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
 #else
-    KERNEL_EXECVE(rr);
+    KERNEL_EXECVE(ex3);
 #endif
     panic("user_main execve failed.\n");
 }
@@ -846,4 +846,11 @@ cpu_idle(void) {
             schedule();
         }
     }
+}
+
+int 
+process_set_priority_cfs(uint64_t p){
+    // cprintf("call the function process_set_priority_cfs and p is %d\n",(uint32_t)p);
+    current->cfs_priority = p;
+    return 0;
 }

@@ -112,7 +112,7 @@ print_nr(){
     cprintf("the level 4 has how many cores:%u\n",core_array[MAX_NUM - 9].nr_free);
     cprintf("the level 2 has how many cores:%u\n",core_array[MAX_NUM - 10].nr_free);
     cprintf("the level 1 has how many cores:%u\n",core_array[MAX_NUM - 11].nr_free);
-        cprintf("---------------end------------------\n");
+    cprintf("---------------end------------------\n");
 };
 
 static void

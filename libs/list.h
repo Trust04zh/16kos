@@ -156,6 +156,19 @@ __list_del(list_entry_t *prev, list_entry_t *next) {
     prev->next = next;
     next->prev = prev;
 }
+static inline void
+list_exchange_pre(list_entry_t * where_start){
+    list_entry_t * temp = where_start->prev;
+    temp->prev->next = where_start;
+    where_start->next->prev = temp;
+    temp->next = where_start->next;
+    where_start->prev = temp->prev;
+    where_start->next = temp;
+    temp->prev = where_start;
+
+    // list_del_init(where_start->prev);
+    // list_add_after(where_start,temp);
+}
 
 #endif /* !__ASSEMBLER__ */
 

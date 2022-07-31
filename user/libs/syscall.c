@@ -80,3 +80,10 @@ int
 sys_get_pcb_address(void){
     return syscall(SYS_get_pcb_address);
 }
+
+int 
+sys_set_priority_cfs(int64_t p){
+    // cprintf("sys_set_priority_cfs %d\n",p); right
+    return syscall(SYS_set_priority_cfs,p);
+    
+}

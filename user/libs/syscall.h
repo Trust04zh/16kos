@@ -10,6 +10,6 @@ int sys_getpid(void);
 int sys_putc(int64_t c);
 int sys_gettime(void);
 int sys_get_pcb_address(void);
-
+int sys_set_priority_cfs(int64_t p);
 #endif /* !__USER_LIBS_SYSCALL_H__ */
 

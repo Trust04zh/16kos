@@ -64,6 +64,10 @@ struct proc_struct {
     skew_heap_entry_t labschedule_run_pool;            // FOR labschedule ONLY: the entry in the run pool
     uint32_t labschedule_stride;                       // FOR labschedule ONLY: the current stride of the process
     uint32_t labschedule_priority;                     // FOR labschedule ONLY: the priority of process, set by labschedule_set_priority(uint32_t)
+    uint32_t labschedule_good;
+    uint32_t cfs_priority;
+    float vruntime;
+    uint32_t real_run_time;                        //FOR CFS algorithm
 };
 
 #define PF_EXITING                  0x00000001      // getting shutdown
@@ -96,5 +100,6 @@ int do_yield(void);
 int do_execve(const char *name, size_t len, unsigned char *binary, size_t size);
 int do_wait(int pid, int *code_store);
 int do_kill(int pid);
+// int process_set_priority_cfs(int64_t p);
 #endif /* !__KERN_PROCESS_PROC_H__ */
 

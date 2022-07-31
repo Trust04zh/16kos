@@ -32,6 +32,7 @@ int kill(int pid);
 int getpid(void);
 unsigned int gettime_msec(void);
 int get_pcb_address(void);
+int set_priority_cfs(int p);
 
 #endif /* !__USER_LIBS_ULIB_H__ */
 

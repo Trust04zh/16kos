@@ -50,3 +50,9 @@ int
 get_pcb_address(void){
     return sys_get_pcb_address();
 }
+
+int 
+set_priority_cfs(int p){
+    // cprintf("set_priority_cfs : %d,%d\n",p,(int64_t)p);
+    return sys_set_priority_cfs((int64_t)p);
+}

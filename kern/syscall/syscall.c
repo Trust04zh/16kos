@@ -69,6 +69,11 @@ static int sys_get_pcb_address(){
     return &(current->pid);
 }
 
+static int sys_set_priority_cfs(uint64_t arg[]){
+    uint64_t p =  (uint64_t)(int)arg[0];
+    return process_set_priority_cfs(p);
+}
+
 static int (*syscalls[])(uint64_t arg[]) = {
     [SYS_exit]              sys_exit,
     [SYS_fork]              sys_fork,
@@ -80,6 +85,7 @@ static int (*syscalls[])(uint64_t arg[]) = {
     [SYS_putc]              sys_putc,
     [SYS_gettime]           sys_gettime,
     [SYS_get_pcb_address]   sys_get_pcb_address,
+    [SYS_set_priority_cfs]   sys_set_priority_cfs,
 };
 
 #define NUM_SYSCALLS        ((sizeof(syscalls)) / (sizeof(syscalls[0])))

@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <default_sched.h>
+#include<priority_sched.h>
+#include<cfs_sched.h>
+#include<rr_p_sched.h>
 
 // the list of timer
 static list_entry_t timer_list;
@@ -46,8 +49,11 @@ void
 sched_init(void) {
     list_init(&timer_list);
 
-    sched_class = &default_sched_class;
-    //sched_class = &stride_sched_class;
+    // sched_class = &default_sched_class;
+    // sched_class = &stride_sched_class;
+    // sched_class = &priority_sched_class;
+    // sched_class = &cfs_sched_class;
+    sched_class = &rr_p_sched_class;
 
     rq = &__rq;
     rq->max_time_slice = MAX_TIME_SLICE;
@@ -84,6 +90,7 @@ schedule(void) {
     {
         current->need_resched = 0;
         if (current->state == PROC_RUNNABLE) {
+            // current->real_run_time += rq.max_sc
             sched_class_enqueue(current);
         }
         if ((next = sched_class_pick_next()) != NULL) {
