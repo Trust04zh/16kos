@@ -1,0 +1,192 @@
+
+OpenSBI v0.6
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|____/_____|
+        | |
+        |_|
+
+Platform Name          : QEMU Virt Machine
+Platform HART Features : RV64ACDFIMSU
+Platform Max HARTs     : 8
+Current Hart           : 0
+Firmware Base          : 0x80000000
+Firmware Size          : 120 KB
+Runtime SBI Version    : 0.2
+
+MIDELEG : 0x0000000000000222
+MEDELEG : 0x000000000000b109
+PMP0    : 0x0000000080000000-0x000000008001ffff (A)
+PMP1    : 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
+OS is loading ...
+
+memory management: default_pmm_manager
+membegin 80200000 memend 88000000 mem_size 7e00000
+physcial memory map:
+  memory: 0x07e00000, [0x80200000, 0x87ffffff].
+check_alloc_page() succeeded!
+check_pgdir() succeeded!
+check_boot_pgdir() succeeded!
+sched class: cfs_scheduler
+start the proc_init function
+setup timer interrupts
+Start run the idle process
+The next proc is pid:1
+The next proc is pid:2
+kernel_execve: pid = 2, name = "ex3".
+Breakpoint
+main: fork ok,now need to wait pids.
+The next proc is pid:3
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+The next proc is pid:5
+The next proc is pid:6
+The next proc is pid:7
+The next proc is pid:4
+child pid 4, acc 800001, time 2590
+child pid 6, acc 800001, time 2750
+child pid 7, acc 800001, time 2810
+child pid 5, acc 800001, time 2840
+child pid 3, acc 800001, time 3090
+The next proc is pid:2
+main: wait pids over
+The next proc is pid:1
+all user-mode processes have quit.
+The end of init_main
+kernel panic at kern/process/proc.c:414:
+    initproc exit.
+
