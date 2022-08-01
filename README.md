@@ -158,6 +158,43 @@ First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在�
 
 对于buddy system 主要相比于First fit有更少的外碎片，对比Best fit 而buddy system能在大部分情况以O（1）的时间分配，尤其是在小页面分配需求比较多的情况下,而Best fit 往往在寻找到不错的解之后，依旧会搜寻整个空闲页表队列。
 
+验证：
+我们测试buddy system的方法主要是自己写的测试函数：
+在basic_check()函数中，我们会先分配3个页面，然后打印输出整个数组的链表，在把页面还回去的时候，也打印输出整个链表，其中会assert总的页面的数量和free_area.nr_free
+```
+    size_t temp_nr = nr_free_pages();
+    print_nr();
+    struct Page *p0, *p1, *p2, * p3, *p4;
+    p0 = p1 = p2 = NULL;
+    assert((p0 = alloc_page()) != NULL);
+    assert((p1 = alloc_page()) != NULL);
+    assert((p2 = alloc_page()) != NULL);
+    cprintf("p0 physical address %x \n",page2pa(p0));
+    cprintf("p1 physical address %x \n",page2pa(p1));
+    cprintf("p2 physical address %x \n",page2pa(p2));
+    cprintf("It can prove that we make the page to 16KB\n");
+    p3 = alloc_pages(4);
+    p4 = alloc_pages(1023);
+    print_nr();
+    free_page(p0);
+    free_page(p1);
+    free_page(p2);
+    print_nr();
+    free_pages(p3,4);
+    free_pages(p4,1023);
+    assert(temp_nr == nr_free_pages());
+    assert(temp_nr == free_area.nr_free);
+```
+![image](https://user-images.githubusercontent.com/87351355/182063742-5c130401-4b0f-4fde-853e-4103f9aafa48.png)
+![image](https://user-images.githubusercontent.com/87351355/182063925-359b6a9e-e3f5-4cc7-88c5-6f73e9b75583.png)
+
+可以看见的是，在前一次的页表中level2的页表有1个，在还回去3个页表的时候进行页表的合并，会发现level2的页表变成0个。故此发生了页表的合并，可以验证buddy system的正确性。在这里会有一个设计就是当你先申请3个页面，再分配3个页面不会回到原来的状态。这是因为在合并的时候我们是按照根据地址右移相应的位数之后数字是否相同来确定是否能合并。但是在最开始是分配8007个初始的页表，然后在这个时候进行的拆分却不一定是按照合并的规则来的，因为我们无法控制最开始物理地址的分配是从哪里开始分配的。
+其中验证能否进行合并的代码如下：
+```
+(pre_pa >> (shift_how_many_bit + index)) == (current_pa >> (shift_how_many_bit + index))
+// shift_how_many_bit = 14+1,这个值是16kos决定的，是一个宏，可以根据页表大小进行修改
+```
+
 
 ### 进程管理
 
@@ -170,6 +207,21 @@ First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在�
 #### 完全公平进程管理
 我们对于CFS进程调度算法进行实现在'kern/schedule/cfs_shed.c',对比算法是轮转优先级直接调度算法，实现在'kern/schedule/rr_q_shed.c'. CFS算法其中核心的思想是通过所谓的优先级的设置来计算核心调度指标vruntime。优先级高的任务每次被调度的时间会更长，但是由于vruntime的存在，它的vruntime比较大，而每次我们在调度的时候会选择vruntime最小的那个，所以优先级高的任务被调度的可能性更小，被调度的次数也更少。所以在完全公平调度算法里面，所谓的优先级设置高或者低不会影响实际的运行时间。这个我们也通过ex3进行了测试，当我们把一个程序的所谓的优先级设置成50后，另外的优先级设置成1,2,3,4.最后5个进程几乎是在一起完成同样大小的任务，所以该调度算法最大保证了公平性。而如果是剥夺性优先级调度算法会完全先执行完优先级高的任务。如果是轮转优先级直接调度算法，会按照优先级线性分配时间片，也对低优先级任务不公平。
 ![image](https://user-images.githubusercontent.com/87351355/182007904-74824380-7e6d-418d-9550-9ac9d2249b9b.png)
+
+对于CFS的测试：
+完全公平调度本身的设计核心就是更加敏捷的调度和更加公平的调度。在测试CFS的时候，我们采用之前asssignment3的ex3进行测试。ex3中给的优先级的值如下：
+![image](https://user-images.githubusercontent.com/87351355/182068228-f0be33e4-43d5-4ce5-b88f-e606b52cb842.png)
+轮转优先级直接调度算法，这个是在assignment3中实现的算法，优先级越高每次实现的时间片越大。
+![image](https://user-images.githubusercontent.com/87351355/182068800-99a46492-8253-42e0-a7ca-fd4e51a50428.png)
+![image](https://user-images.githubusercontent.com/87351355/182068829-a8a09d37-e857-4bae-98d8-db6df993b12b.png)
+
+可以看见的是，对于轮转优先级直接调度算法，理论上一个user process故意设计高优先级的进程，那么总是可以获得更长时间的调度。我们可以看见优先级是50的进程运行完的时间远短于其他优先级的进程。
+
+对于CFS调度的结果如下：
+![image](https://user-images.githubusercontent.com/87351355/182069861-e9dc5a7c-130f-448d-8777-cbc56566c4ba.png)
+
+
+
 
 
 ### 其他
