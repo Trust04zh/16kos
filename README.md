@@ -138,19 +138,129 @@ return TRANSLATE_SUCCESS;
 
 #### First Fit
 
-First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在初始化时将所有的空闲页组按地址顺序维护在一个链表中，每个空闲页组包括连续的若干空闲页，需要分配空闲页时，算法找到链表中第一个满足需求页数目的空闲页组，并从中进行分配。需要回收页时，算法根据地址把回收的页组插入到链表中相应的位置，并检查是否能与前后的空闲页组进行合并。First Fit算法的验证由ucore内置。
+First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在初始化时将所有的空闲页组按地址顺序维护在一个链表中，每个空闲页组包括连续的若干空闲页，需要分配空闲页时，算法找到链表中第一个满足需求页数目的空闲页组，并从中进行分配。需要回收页时，算法根据地址把回收的页组插入到链表中相应的位置，并检查是否能与前后的空闲页组进行合并。First Fit算法的验证由ucore内置，由于不是我们写的代码，我们仅提供运行结果。
 
 #### Best Fit
 
-我们将Best Fit页分配算法实现在`kern/mm/best_fit_pmm.c`中，该算法与Best Fit算法的区别在于，其在分配空闲页时选择的是最合适的——在满足需求页数目的前提下最小的——空闲页组，而不是第一个满足需求页数目的空闲页组。Best fit 算法基本扩展于First fit 算法.  Best Fit算法的验证主要进行与first fit 不同之处的验证， 在first fit验证算法上进行精简。
+我们将Best Fit页分配算法实现在`kern/mm/best_fit_pmm.c`中，该算法与Best Fit算法的区别在于，其在分配空闲页时选择的是最合适的——在满足需求页数目的前提下最小的——空闲页组，而不是第一个满足需求页数目的空闲页组。Best fit 算法基本扩展于First fit 算法.  Best Fit算法的验证主要进行与first fit 不同之处的验证， 在由lab课代码实现first fit验证算法上我们额外加入以下测试
+Best fit 实现思路：主要是在alloc 分配的时候添加一个while的循环，然后找到最合适的那一个，主要都是建立在已经有的lab课自带的First fit的基础上。
+```
+    int min_distance = 2147483647;
+    while ((le = list_next(le)) != &free_list) {
+        struct Page *p = le2page(le, page_link);
+        if (p->property >= n && p->property - n < min_distance) {
+            min_distance = p->property - n;
+            page = p;
+        }
+    }
+```
+Best fit 测试思路：
+```
+    struct Page *p0 = alloc_pages(12), *p1, *p2;
+    free_pages(p0 + 2, 3);
+    free_pages(p0 + 7, 2);
+    cprintf("p0+7 ppa: %x\n", page2pa(p0 + 7));
+    cprintf("p0+2 ppa: %x\n", page2pa(p0 + 2));
+    p1 = alloc_pages(2);
+    assert(p1 == p0 + 7);
+```
+
+测试Best fit算法思路是先alloc 12个页面，然后再分批次还回去大小是2,3的连续页表，再分配一个大小是2的页表，这时候如果是First fit会直接分配第一个出去，但是Best fit会寻找到大小最合适的那个，最后通过了测试。
+
+![image](https://user-images.githubusercontent.com/87351355/182085083-2e74baca-309d-4087-88d5-74c4972b37e6.png)
+
 
 #### (Binary) Buddy System
 
-我们将张教授上课教的算法实现在'kern/mm/buddy_pmm.c'中，其中维护1,2,4,8,16,32,64,128,256,512,1024 大小的连续页表的数组。每个数组的头列表都是一个free_area结构体，在之后连接属于这个大小的连续页面。每次alloc page 之时，先寻找到大于等于这个需求页面的大小，然后整块分配，把多余的页表还回数组中。在free页面的时候，需要考虑是否能和周围的页表项进行合并，然后升级。
-
-在能否进行合并的判定上面。我们采取张教授所提示的依据物理地址或者物理页号的二进制位数结合掩码的形式判断，比如对于页表项大小是1，我们判定物理页面地址前（32-15）位是相同的即可合并。
-
+我们将张教授上课教的算法实现在'kern/mm/buddy_pmm.c'中，其中维护1,2,4,8,16,32,64,128,256,512,1024 大小的连续页表的数组。每个数组的头列表都是一个free_area结构体，在之后连接属于这个大小的连续页面。所有的空闲页表都是放在这个core_array数组中的，
+```
+#define MAX_NUM 11
+free_area_t free_area;
+free_area_t core_array[MAX_NUM];
+int tool_array[11] = {1,2,4,8,16,32,64,128,256,512,1024};
+```
+每次alloc page 之时，先寻找到大于等于这个需求页面的大小，然后整块分配，把多余的页表还回数组中。这一点的设计能让我们的buddy system 实际上可以分配任意大小的页面，不只是2的倍数:
+```
+//截取于 buddy_alloc_page function，更加完整的代码由于报告篇幅问题请详见源文件'kern/mm/buddy_pmm.c'
+page = _buddy_alloc_pages_by_index(temp_index);
+    if(tool_array[temp_index] == n){
+        ClearPageProperty(page);
+        return page; // Which means that it just proper;
+    }else 
+    {
+        assert(n < tool_array[temp_index]);
+        struct Page * page_to_free = page + n;
+        page_to_free->property = page->property - n;
+        page->property = n;
+        free_page_buddy(page_to_free,  page_to_free->property);
+        ClearPageProperty(page);
+    }
+ ```
+在free页面的时候，需要考虑是否能和周围的页表项进行合并，然后升级。在能否进行合并的判定上面。我们采取张教授所提示的依据物理地址或者物理页号的二进制位数结合掩码的形式判断，比如对于页表项大小是1，我们判定物理页面地址前（32-15）位是相同的即可合并。这个函数是可以递归的，因为一次性free的页面大小是不确定的，有可能会free超过1024个，所以当超过1024大小时，继续调用这个函数。比如在操作系统最开始会直接分配8007个页面，这个时候我也认为是free而没有为init单独写一个函数。add_page_into_list这个函数是最后加入到core_array的函数，在这里需要注意的要 调用SetPageProperty对于那些要成为“队长”的页表项。在合并之后需要调用 merge_page。
 在实现对于PAGE FLAG 的管理上面，我们采取和First fit相同的管理方式，是free page 并且是链表头部，我们会对应page SetPageProperty。
+```
+static void
+free_page_buddy(struct Page *base, size_t n){ // this method  handle the page which is smller or equal or bigger than 1024
+// This is the main function of free page 
+    assert(n > 0);
+    int temp_index= -1;
+    for(int i=MAX_NUM-1;i >=0;i--){
+        if (tool_array[i] <= n){
+            temp_index = i;
+            break;
+        }
+    }
+    if(temp_index == -1){
+        temp_index = MAX_NUM - 1;
+    }
+    assert(temp_index >= 0);
+    int rest = n - tool_array[temp_index];
+    add_page_into_list(base,temp_index);
+    // cprintf("call the free_page_buddy function, and the rest is %u, and the temp_index is %u \n",rest,temp_index);
+    if( rest > 0){
+        free_page_buddy( base +  tool_array[temp_index], rest);
+    }
+    return;
+}
+static void add_page_into_list(struct Page *base, int index){
+    uintptr_t current_pa = page2pa(base);
+    list_entry_t * head = &(core_array[index].free_list);
+    list_entry_t * temp = head->next;
+    base->property = tool_array[index];
+    SetPageProperty(base);
+    list_add(&free_area.free_list,&(base->page_link));
+    free_area.nr_free += base->property;
+    if( temp == head){
+        list_add(head, &(base->buddy_link));
+        core_array[index].nr_free ++;
+        return;
+    }
+    while (1)
+    {
+        uintptr_t temp_pa = page2pa(le2page(temp,buddy_link));
+        if (temp_pa > current_pa){
+            list_add_before(temp, &(base->buddy_link));
+            break;
+        }
+        temp = temp->next;
+        if(temp == head){
+            list_add_before(head, &(base->buddy_link));
+            break;
+        }
+    }
+    core_array[index].nr_free ++;
+    merge_page(base,index);
+    return;
+}
+```
+
+验证能否进行合并:
+
+```
+(pre_pa >> (shift_how_many_bit + index)) == (current_pa >> (shift_how_many_bit + index))
+// shift_how_many_bit = 14+1,这个值是16kos决定的，是一个宏，可以根据页表大小进行修改
+```
+
 
 在对于free_area 的遗留问题，最开始我们使用page_link 链接相同大小的page, 但在之后发现free_area在别的地方比如swap的测试中有直接的使用，所以在后来在page struct中添加buddy_link属性，并且依旧在对buddy数组维护的过程中，依旧维护free_area所代表的free_page的链表。
 
@@ -158,7 +268,8 @@ First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在�
 
 对于buddy system 主要相比于First fit有更少的外碎片，对比Best fit 而buddy system能在大部分情况以O（1）的时间分配，尤其是在小页面分配需求比较多的情况下,而Best fit 往往在寻找到不错的解之后，依旧会搜寻整个空闲页表队列。
 
-验证：
+buddy system验证：
+
 我们测试buddy system的方法主要是自己写的测试函数：
 在basic_check()函数中，我们会先分配3个页面，然后打印输出整个数组的链表，在把页面还回去的时候，也打印输出整个链表，其中会assert总的页面的数量和free_area.nr_free
 ```
@@ -185,15 +296,14 @@ First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在�
     assert(temp_nr == nr_free_pages());
     assert(temp_nr == free_area.nr_free);
 ```
+
 ![image](https://user-images.githubusercontent.com/87351355/182063742-5c130401-4b0f-4fde-853e-4103f9aafa48.png)
+
 ![image](https://user-images.githubusercontent.com/87351355/182063925-359b6a9e-e3f5-4cc7-88c5-6f73e9b75583.png)
 
 可以看见的是，在前一次的页表中level2的页表有1个，在还回去3个页表的时候进行页表的合并，会发现level2的页表变成0个。故此发生了页表的合并，可以验证buddy system的正确性。在这里会有一个设计就是当你先申请3个页面，再分配3个页面不会回到原来的状态。这是因为在合并的时候我们是按照根据地址右移相应的位数之后数字是否相同来确定是否能合并。但是在最开始是分配8007个初始的页表，然后在这个时候进行的拆分却不一定是按照合并的规则来的，因为我们无法控制最开始物理地址的分配是从哪里开始分配的。
-其中验证能否进行合并的代码如下：
-```
-(pre_pa >> (shift_how_many_bit + index)) == (current_pa >> (shift_how_many_bit + index))
-// shift_how_many_bit = 14+1,这个值是16kos决定的，是一个宏，可以根据页表大小进行修改
-```
+
+
 
 
 ### 进程管理
@@ -204,25 +314,34 @@ First Fit页分配算法由ucore实现在`kern/mm/default_pmm.c`中，算法在�
 
 通过进程调度切换进程时，`satp`作为上下文更新，`mm`随着内核维护的当前进程结构体指针的更新而更新，从而实现了虚拟内存空间的正确切换。
 
+#### RR轮转进程管理
+该进程管理的实现是由lab课代码迁移，通过运行ex3.c进行测试
+
+![image](https://user-images.githubusercontent.com/87351355/182083411-6d9e78b7-a648-49a4-b62e-e39cfcc5f431.png)
+
+可以看到最后所有进程是完全按照3,4,5,6,7,的顺序结束的，并且结束的时间基本一致。
+
 #### 完全公平进程管理
 我们对于CFS进程调度算法进行实现在'kern/schedule/cfs_shed.c',对比算法是轮转优先级直接调度算法，实现在'kern/schedule/rr_q_shed.c'. CFS算法其中核心的思想是通过所谓的优先级的设置来计算核心调度指标vruntime。优先级高的任务每次被调度的时间会更长，但是由于vruntime的存在，它的vruntime比较大，而每次我们在调度的时候会选择vruntime最小的那个，所以优先级高的任务被调度的可能性更小，被调度的次数也更少。所以在完全公平调度算法里面，所谓的优先级设置高或者低不会影响实际的运行时间。这个我们也通过ex3进行了测试，当我们把一个程序的所谓的优先级设置成50后，另外的优先级设置成1,2,3,4.最后5个进程几乎是在一起完成同样大小的任务，所以该调度算法最大保证了公平性。而如果是剥夺性优先级调度算法会完全先执行完优先级高的任务。如果是轮转优先级直接调度算法，会按照优先级线性分配时间片，也对低优先级任务不公平。
 ![image](https://user-images.githubusercontent.com/87351355/182007904-74824380-7e6d-418d-9550-9ac9d2249b9b.png)
 
 对于CFS的测试：
 完全公平调度本身的设计核心就是更加敏捷的调度和更加公平的调度。在测试CFS的时候，我们采用之前asssignment3的ex3进行测试。ex3中给的优先级的值如下：
+
 ![image](https://user-images.githubusercontent.com/87351355/182068228-f0be33e4-43d5-4ce5-b88f-e606b52cb842.png)
+
 轮转优先级直接调度算法，这个是在assignment3中实现的算法，优先级越高每次实现的时间片越大。
+
 ![image](https://user-images.githubusercontent.com/87351355/182068800-99a46492-8253-42e0-a7ca-fd4e51a50428.png)
 ![image](https://user-images.githubusercontent.com/87351355/182068829-a8a09d37-e857-4bae-98d8-db6df993b12b.png)
 
 可以看见的是，对于轮转优先级直接调度算法，理论上一个user process故意设计高优先级的进程，那么总是可以获得更长时间的调度。我们可以看见优先级是50的进程运行完的时间远短于其他优先级的进程。
 
 对于CFS调度的结果如下：
-![image](https://user-images.githubusercontent.com/87351355/182069861-e9dc5a7c-130f-448d-8777-cbc56566c4ba.png)
 
+![image](https://user-images.githubusercontent.com/87351355/182082535-3bdd7d4c-0078-44c4-b929-d9bd89581e82.png)
 
-
-
+无论某个进程主动设置的这个所谓的优先级有多高，其实最后大家被结束的时间都差不多。调度算法如其名，completely fair scheduler，至于写这个bonus part的原因是张教授在上课大约花了半节课讲这个linux系统实际使用的进程调度，故想实现出来。
 
 ### 其他
 
