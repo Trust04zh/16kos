@@ -27,8 +27,8 @@
 **项目分支说明：**
 本项目有多个分支，master分支为主要运行分支，但考虑到在展示过程中有可能需要切换进程调度算法，页面分配算法等，其他分支均为方便展示而用。
 
-** 项目测试输出说明：**
-为方便助教查看输出，我们将输出重定向到txt，在主目录中可以查看。
+**项目测试输出说明：**
+为方便助教查看输出，我们将输出重定向到txt，其中default_all.txt包含对于default scheduler， default swap，default pmm 的输出测试，在主目录中可以查看。
 
 ### 构建与运行
 
@@ -199,7 +199,7 @@ page = _buddy_alloc_pages_by_index(temp_index);
         ClearPageProperty(page);
     }
  ```
-在free页面的时候，需要考虑是否能和周围的页表项进行合并，然后升级。在能否进行合并的判定上面。我们采取张教授所提示的依据物理地址或者物理页号的二进制位数结合掩码的形式判断，比如对于页表项大小是1，我们判定物理页面地址前（32-15）位是相同的即可合并。这个函数是可以递归的，因为一次性free的页面大小是不确定的，有可能会free超过1024个，所以当超过1024大小时，继续调用这个函数。比如在操作系统最开始会直接分配8007个页面，这个时候我也认为是free而没有为init单独写一个函数。add_page_into_list这个函数是最后加入到core_array的函数，在这里需要注意的要 调用SetPageProperty对于那些要成为“队长”的页表项。在合并之后需要调用 merge_page。
+在free页面的时候，需要考虑是否能和周围的页表项进行合并，然后升级。有可能会free超过1024个，所以当超过1024大小时，继续调用这个函数。比如在操作系统最开始会直接分配8007个页面，这个时候我也认为是free而没有为init单独写一个函数。add_page_into_list这个函数是最后加入到core_array的函数，在这里需要注意的要 调用SetPageProperty对于那些要成为“队长”的页表项。在合并之后需要调用 merge_page。
 在实现对于PAGE FLAG 的管理上面，我们采取和First fit相同的管理方式，是free page 并且是链表头部，我们会对应page SetPageProperty。
 ```
 static void
@@ -257,7 +257,7 @@ static void add_page_into_list(struct Page *base, int index){
 }
 ```
 
-判定能否进行合并关键性代码:
+判定能否进行合并关键性代码如下。我们采取张教授所提示的依据物理地址或者物理页号的二进制位数结合掩码的形式判断，比如对于页表项大小是1，我们判定物理页面地址前（32-15）位是相同的即可合并。merge这个函数是可以递归的。:
 
 ```
 (pre_pa >> (shift_how_many_bit + index)) == (current_pa >> (shift_how_many_bit + index))
@@ -265,11 +265,23 @@ static void add_page_into_list(struct Page *base, int index){
 ```
 
 
-在对于free_area 的遗留问题，最开始我们使用page_link 链接相同大小的page, 但在之后发现free_area在别的地方比如swap的测试中有直接的使用，所以在后来在page struct中添加buddy_link属性，并且依旧在对buddy数组维护的过程中，依旧维护free_area所代表的free_page的链表。
+在对于free_area 的遗留问题，这个遗留问题是指在swap的测试中，会检查free_area中空闲的页表的数目，然后我们在实现buddy的时候没有使用这个变量。为了别的地方能继续使用free_area,我们单独使用了buddy_link，并且在对buddy数组维护的过程中，依旧维护free_area所代表的free_page的链表。
 
-![image](https://user-images.githubusercontent.com/87351355/181915001-59a5dbd9-9581-4155-9b01-779bff512c79.png)
+```
+struct Page {
+    int ref;                        // page frame's reference counter
+    uint64_t flags;                 // array of flags that describe the status of the page frame
+    unsigned int property;          // the num of free block, used in first fit pm manager
+    list_entry_t page_link;         // free list link
+    list_entry_t pra_page_link;     // used for pra (page replace algorithm)
+    uintptr_t pra_vaddr;            // used for pra (page replace algorithm)
+    list_entry_t buddy_link;        //used for buddy system
+};
+```
 
-对于buddy system 主要相比于First fit有更少的外碎片，对比Best fit 而buddy system能在大部分情况以O（1）的时间分配，尤其是在小页面分配需求比较多的情况下,而Best fit 往往在寻找到不错的解之后，依旧会搜寻整个空闲页表队列。
+buddy system的优势：
+
+对于buddy system 主要相比于First fit有更少的外碎片，对比Best fit 而buddy system能在大部分情况以O（1）的时间分配，尤其是在小页面分配需求比较多的情况下,而Best fit 往往在寻找到不错的解之后，依旧会搜寻整个空闲页表队列。但是对于时间比较少这点由于我的buddy system没有使用红黑树实现，所以无法给出证明，只能在如下给出正确性证明。
 
 buddy system验证：
 
